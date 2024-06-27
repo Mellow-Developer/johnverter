@@ -21,6 +21,8 @@ class Generator {
         final fieldName = Utils.toCamelCase(entry.key);
         if (fieldType == List<dynamic>) {
           return '  ${considerFinalFields ? 'final' : ''} List<${Utils.capitalizeFirstLetter(fieldName)}${resPrefix ? 'Res' : ''}Dto?>? $fieldName;';
+        } else if (entry.value is Map<String, dynamic>) {
+          return '  ${considerFinalFields ? 'final' : ''} ${Utils.capitalizeFirstLetter(fieldName)}${resPrefix ? 'Res' : ''}Dto? $fieldName;';
         } else {
           final dartType = Utils.getDartType(fieldType);
           return '  ${considerFinalFields ? 'final' : ''} $dartType${considerNullable ? '?' : ''} $fieldName;';
@@ -77,6 +79,18 @@ $fields
           final nestedCodeString = generateDtoClass(
             Utils.capitalizeFirstLetter(key),
             value.firstOrNull,
+            considerFinalFields,
+            considerNullable,
+            includeFromJson,
+            includeToJson,
+            resPrefix,
+          );
+
+          codeString = codeString + nestedCodeString;
+        } else if (value is Map<String, dynamic>) {
+          final nestedCodeString = generateDtoClass(
+            Utils.capitalizeFirstLetter(key),
+            value,
             considerFinalFields,
             considerNullable,
             includeFromJson,
@@ -144,6 +158,18 @@ $fields
           );
 
           codeString = codeString + nestedCodeString;
+        } else if (value is Map<String, dynamic>) {
+          final nestedCodeString = generateEntityClass(
+            Utils.capitalizeFirstLetter(key),
+            value,
+            considerFinalFields,
+            considerNullable,
+            includeFromJson,
+            includeToJson,
+            resPrefix,
+          );
+
+          codeString = codeString + nestedCodeString;
         }
       },
     );
@@ -164,7 +190,7 @@ $fields
         return '      $fieldName: $nestedFieldName?.map((final ${Utils.capitalizeFirstLetter(fieldName)}${resPrefix ? 'Res' : ''}Dto? e) => e?.mapToEntity()).toList(),';
       } else if (fieldValue is Map<String, dynamic>) {
         final nestedFieldName = Utils.toCamelCase(entry.key);
-        return '      $fieldName: $nestedFieldName.mapToEntity(),';
+        return '      $fieldName: $nestedFieldName?.mapToEntity(),';
       } else {
         return '      $fieldName: $fieldName,';
       }
@@ -187,6 +213,14 @@ $fields
           final nestedCodeString = generateMapperExtensions(
             Utils.capitalizeFirstLetter(key),
             value.firstOrNull,
+            resPrefix,
+          );
+
+          codeString = codeString + nestedCodeString;
+        } else if (value is Map<String, dynamic>) {
+          final nestedCodeString = generateMapperExtensions(
+            Utils.capitalizeFirstLetter(key),
+            value,
             resPrefix,
           );
 
