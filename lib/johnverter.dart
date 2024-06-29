@@ -35,7 +35,9 @@ class JsonToDtoConverterState extends State<Johnverter> {
     final jsonString = _jsonController.text;
     final baseClassName = Utils.capitalizeFirstLetter(_classNameController.text);
     try {
-      final Map<String, dynamic> jsonMap = json.decode(jsonString);
+      final Map<String, dynamic> jsonMap = jsonDecode(jsonString.startsWith('[')
+          ? jsonString.substring(jsonString.indexOf('{'), jsonString.indexOf('}') + 1).toString()
+          : jsonString);
       Map<String, dynamic> targetJsonMap;
 
       if (_considerDataKey && jsonMap.containsKey('data')) {
