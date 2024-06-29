@@ -30,7 +30,10 @@ migrate_working_dir/
 .pub-cache/
 .pub/
 /build/
-*.lock
+pubspec.lock
+/.github/**
+/.firebase/**
+.firebaserc
 
 # Symbolication related
 app.*.symbols
