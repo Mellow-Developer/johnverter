@@ -19,7 +19,7 @@ class Generator {
       (entry) {
         final fieldType = entry.value.runtimeType;
         final fieldName = Utils.toCamelCase(entry.key);
-        if (fieldType == List<dynamic>) {
+        if (entry.value is List) {
           return '  ${considerFinalFields ? 'final' : ''} List<${Utils.capitalizeFirstLetter(fieldName)}${resPrefix ? 'Res' : ''}Dto?>? $fieldName;';
         } else if (entry.value is Map<String, dynamic>) {
           return '  ${considerFinalFields ? 'final' : ''} ${Utils.capitalizeFirstLetter(fieldName)}${resPrefix ? 'Res' : ''}Dto? $fieldName;';
@@ -123,7 +123,7 @@ $fields
     final fields = jsonMap.entries.map((entry) {
       final fieldType = entry.value.runtimeType;
       final fieldName = Utils.toCamelCase(entry.key);
-      if (fieldType == List<dynamic>) {
+      if (entry.value is List) {
         return '  ${considerFinalFields ? 'final' : ''} List<${Utils.capitalizeFirstLetter(fieldName)}${resPrefix ? 'Res' : ''}Entity?>? $fieldName;';
       } else if (entry.value is Map<String, dynamic>) {
         return '  ${considerFinalFields ? 'final' : ''} ${Utils.capitalizeFirstLetter(fieldName)}${resPrefix ? 'Res' : ''}Entity? $fieldName;';
