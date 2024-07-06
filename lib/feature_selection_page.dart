@@ -1,8 +1,9 @@
-import 'package:json_converter/johnverter.dart';
+import 'package:json_converter/features/johnverter.dart';
 import 'package:flutter/material.dart';
+import 'package:json_converter/features/request_dto_generator.dart';
 
-class FeaturesPage extends StatelessWidget {
-  const FeaturesPage({super.key});
+class FeatureSelectionPage extends StatelessWidget {
+  const FeatureSelectionPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -17,9 +18,7 @@ class FeaturesPage extends StatelessWidget {
                   (states) => const Size(500, 50),
                 ),
                 shape: MaterialStateProperty.resolveWith(
-                  (states) => RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10)
-                  ),
+                  (states) => RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                 ),
               ),
               onPressed: () {
@@ -31,23 +30,27 @@ class FeaturesPage extends StatelessWidget {
               },
               child: const Text('Johnverter'),
             ),
-            // const SizedBox(
-            //   height: 16,
-            // ),
-            // ElevatedButton(
-            //   style: ButtonStyle(
-            //     minimumSize: MaterialStateProperty.resolveWith(
-            //           (states) => const Size(500, 50),
-            //     ),
-            //     shape: MaterialStateProperty.resolveWith(
-            //           (states) => RoundedRectangleBorder(
-            //           borderRadius: BorderRadius.circular(10)
-            //       ),
-            //     ),
-            //   ),
-            //   onPressed: () {},
-            //   child: const Text('Request DTO generator'),
-            // ),
+            const SizedBox(
+              height: 16,
+            ),
+            ElevatedButton(
+              style: ButtonStyle(
+                minimumSize: MaterialStateProperty.resolveWith(
+                  (states) => const Size(500, 50),
+                ),
+                shape: MaterialStateProperty.resolveWith(
+                  (states) => RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                ),
+              ),
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (final context) => const RequestDtoGenerator(),
+                  ),
+                );
+              },
+              child: const Text('Request DTO generator'),
+            ),
             // const SizedBox(
             //   height: 16,
             // ),
