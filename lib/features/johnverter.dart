@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/widgets.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:json_converter/generators.dart';
 import 'package:json_converter/utils.dart';
 import 'package:flutter/material.dart';
@@ -90,9 +91,9 @@ class JsonToDtoConverterState extends State<Johnverter> {
       appBar: AppBar(
         elevation: 10,
         backgroundColor: Colors.white,
-        title: const Text(
+        title: Text(
           'Johnverter',
-          style: TextStyle(fontWeight: FontWeight.w600),
+          style: GoogleFonts.oswald(),
         ),
       ),
       body: SingleChildScrollView(
@@ -296,7 +297,7 @@ class JsonToDtoConverterState extends State<Johnverter> {
                   ),
                 ],
               ),
-              const SizedBox(height: 32),
+              const SizedBox(height: 16),
               Row(
                 children: [
                   Expanded(

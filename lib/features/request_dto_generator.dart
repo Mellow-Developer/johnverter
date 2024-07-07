@@ -133,12 +133,123 @@ class _RequestDtoGeneratorState extends State<RequestDtoGenerator> {
                   const SizedBox(
                     width: 16,
                   ),
+                  Expanded(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Switch(
+                              value: _considerFinalFields,
+                              onChanged: (bool? value) {
+                                setState(() {
+                                  _considerFinalFields = value ?? false;
+                                });
+                              },
+                            ),
+                            const Expanded(
+                              child: Text(
+                                'Use final fields',
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
+                        Row(
+                          children: [
+                            Switch(
+                              value: _considerNullable,
+                              onChanged: (bool? value) {
+                                setState(() {
+                                  _considerNullable = value ?? false;
+                                });
+                              },
+                            ),
+                            const Expanded(
+                              child: Text(
+                                'Make fields nullable',
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
+                        Row(
+                          children: [
+                            Switch(
+                              value: _reqPrefix,
+                              onChanged: (bool? value) {
+                                setState(() {
+                                  _reqPrefix = value ?? false;
+                                });
+                              },
+                            ),
+                            const Expanded(
+                              child: Text(
+                                'Add Req prefix',
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
+                        Row(
+                          children: [
+                            Switch(
+                              value: _includeToJson,
+                              onChanged: (bool? value) {
+                                setState(() {
+                                  _includeToJson = value ?? false;
+                                });
+                              },
+                            ),
+                            const Expanded(
+                              child: Text(
+                                'Include toJson method',
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
                 ],
               ),
-              ElevatedButton(
-                onPressed: _convertJsonToDto,
-                child: const Text('Convert'),
+              Row(
+                children: [
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: _convertJsonToDto,
+                      style: ButtonStyle(
+                          backgroundColor: MaterialStateProperty.resolveWith(
+                                (states) => Colors.white,
+                          ),
+                          side: MaterialStateProperty.resolveWith(
+                                (states) => const BorderSide(
+                              color: Colors.black26,
+                              width: 2,
+                            ),
+                          ),
+                          elevation: MaterialStateProperty.resolveWith((states) => 1),
+                          padding: MaterialStateProperty.resolveWith(
+                                (states) => const EdgeInsets.symmetric(vertical: 16.0),
+                          ),
+                          shape: MaterialStateProperty.resolveWith(
+                                (states) =>
+                                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          )),
+                      child: const Text(
+                        'Convert',
+                        style: TextStyle(
+                          color: Colors.black54,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
+              const SizedBox(height: 16),
               Row(
                 children: [
                   Expanded(
