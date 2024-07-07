@@ -47,25 +47,23 @@ class _RequestDtoGeneratorState extends State<RequestDtoGenerator> {
         _includeToJson,
         _reqPrefix,
       );
-      // final entityClass = Generator.generateEntityClass(
-      //   baseClassName,
-      //   targetJsonMap,
-      //   _considerFinalFields,
-      //   _considerNullable,
-      //   _includeFromJson,
-      //   _includeToJson,
-      //   _resPrefix,
-      // );
-      // final mappers = Generator.generateMapperExtensions(
-      //   baseClassName,
-      //   targetJsonMap,
-      //   _resPrefix,
-      // );
+      final entityClass = Generator.generateRequestEntityClass(
+        baseClassName,
+        targetJsonMap,
+        _considerFinalFields,
+        _considerNullable,
+        _reqPrefix,
+      );
+      final mappers = Generator.generateRequestMapperExtensions(
+        baseClassName,
+        targetJsonMap,
+        _reqPrefix,
+      );
 
       setState(() {
         _dtoClass = dtoClass;
-        _entityClass = "entityClass";
-        _mappers = 'mappers';
+        _entityClass = entityClass;
+        _mappers = mappers;
       });
     } catch (e) {
       setState(() {
