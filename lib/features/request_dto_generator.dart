@@ -1,28 +1,25 @@
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/widgets.dart';
-import 'package:json_converter/generators.dart';
-import 'package:json_converter/utils.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'dart:convert';
 
-class Johnverter extends StatefulWidget {
-  const Johnverter({super.key});
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:json_converter/generators.dart';
+import 'package:json_converter/utils.dart';
+
+class RequestDtoGenerator extends StatefulWidget {
+  const RequestDtoGenerator({super.key});
 
   @override
-  JsonToDtoConverterState createState() => JsonToDtoConverterState();
+  State<RequestDtoGenerator> createState() => _RequestDtoGeneratorState();
 }
 
-class JsonToDtoConverterState extends State<Johnverter> {
+class _RequestDtoGeneratorState extends State<RequestDtoGenerator> {
   final TextEditingController _jsonController = TextEditingController();
   final TextEditingController _classNameController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   bool _considerFinalFields = true;
-  bool _considerDataKey = true;
   bool _considerNullable = true;
-  bool _includeFromJson = true;
-  bool _includeToJson = false;
-  bool _resPrefix = true;
+  bool _includeToJson = true;
+  bool _reqPrefix = true;
   String _dtoClass = '';
   String _entityClass = '';
   String _mappers = '';
@@ -40,34 +37,27 @@ class JsonToDtoConverterState extends State<Johnverter> {
           : jsonString);
       Map<String, dynamic> targetJsonMap;
 
-      if (_considerDataKey && jsonMap.containsKey('data')) {
-        targetJsonMap = jsonMap['data'];
-      } else {
-        targetJsonMap = jsonMap;
-      }
+      targetJsonMap = jsonMap;
 
-      final dtoClass = Generator.generateDtoClass(
+      final dtoClass = Generator.generateRequestDtoClass(
         baseClassName,
         targetJsonMap,
         _considerFinalFields,
         _considerNullable,
-        _includeFromJson,
         _includeToJson,
-        _resPrefix,
+        _reqPrefix,
       );
-      final entityClass = Generator.generateEntityClass(
+      final entityClass = Generator.generateRequestEntityClass(
         baseClassName,
         targetJsonMap,
         _considerFinalFields,
         _considerNullable,
-        _includeFromJson,
-        _includeToJson,
-        _resPrefix,
+        _reqPrefix,
       );
-      final mappers = Generator.generateMapperExtensions(
+      final mappers = Generator.generateRequestMapperExtensions(
         baseClassName,
         targetJsonMap,
-        _resPrefix,
+        _reqPrefix,
       );
 
       setState(() {
@@ -91,7 +81,7 @@ class JsonToDtoConverterState extends State<Johnverter> {
         elevation: 10,
         backgroundColor: Colors.white,
         title: const Text(
-          'Johnverter',
+          'Request DTO generator',
           style: TextStyle(fontWeight: FontWeight.w600),
         ),
       ),
@@ -186,52 +176,16 @@ class JsonToDtoConverterState extends State<Johnverter> {
                         Row(
                           children: [
                             Switch(
-                              value: _considerDataKey,
+                              value: _reqPrefix,
                               onChanged: (bool? value) {
                                 setState(() {
-                                  _considerDataKey = value ?? false;
+                                  _reqPrefix = value ?? false;
                                 });
                               },
                             ),
                             const Expanded(
                               child: Text(
-                                'Consider only the "data" key',
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                          ],
-                        ),
-                        Row(
-                          children: [
-                            Switch(
-                              value: _resPrefix,
-                              onChanged: (bool? value) {
-                                setState(() {
-                                  _resPrefix = value ?? false;
-                                });
-                              },
-                            ),
-                            const Expanded(
-                              child: Text(
-                                'Add Res prefix',
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                          ],
-                        ),
-                        Row(
-                          children: [
-                            Switch(
-                              value: _includeFromJson,
-                              onChanged: (bool? value) {
-                                setState(() {
-                                  _includeFromJson = value ?? true;
-                                });
-                              },
-                            ),
-                            const Expanded(
-                              child: Text(
-                                'Include fromJson method',
+                                'Add Req prefix',
                                 overflow: TextOverflow.ellipsis,
                               ),
                             ),
@@ -260,7 +214,6 @@ class JsonToDtoConverterState extends State<Johnverter> {
                   ),
                 ],
               ),
-              const SizedBox(height: 16),
               Row(
                 children: [
                   Expanded(
@@ -268,20 +221,20 @@ class JsonToDtoConverterState extends State<Johnverter> {
                       onPressed: _convertJsonToDto,
                       style: ButtonStyle(
                           backgroundColor: MaterialStateProperty.resolveWith(
-                            (states) => Colors.white,
+                                (states) => Colors.white,
                           ),
                           side: MaterialStateProperty.resolveWith(
-                            (states) => const BorderSide(
+                                (states) => const BorderSide(
                               color: Colors.black26,
                               width: 2,
                             ),
                           ),
                           elevation: MaterialStateProperty.resolveWith((states) => 1),
                           padding: MaterialStateProperty.resolveWith(
-                            (states) => const EdgeInsets.symmetric(vertical: 16.0),
+                                (states) => const EdgeInsets.symmetric(vertical: 16.0),
                           ),
                           shape: MaterialStateProperty.resolveWith(
-                            (states) =>
+                                (states) =>
                                 RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                           )),
                       child: const Text(
@@ -296,7 +249,7 @@ class JsonToDtoConverterState extends State<Johnverter> {
                   ),
                 ],
               ),
-              const SizedBox(height: 32),
+              const SizedBox(height: 16),
               Row(
                 children: [
                   Expanded(
@@ -306,7 +259,9 @@ class JsonToDtoConverterState extends State<Johnverter> {
                       onCopyPressed: () => _copyToClipboard(_dtoClass),
                     ),
                   ),
-                  const SizedBox(width: 16),
+                  const SizedBox(
+                    width: 16,
+                  ),
                   Expanded(
                     child: _buildContainer(
                       title: 'Entities',
@@ -314,7 +269,9 @@ class JsonToDtoConverterState extends State<Johnverter> {
                       onCopyPressed: () => _copyToClipboard(_entityClass),
                     ),
                   ),
-                  const SizedBox(width: 16),
+                  const SizedBox(
+                    width: 16,
+                  ),
                   Expanded(
                     child: _buildContainer(
                       title: 'Mappers',

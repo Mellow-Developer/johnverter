@@ -1,4 +1,4 @@
-import 'package:json_converter/features.dart';
+import 'package:json_converter/feature_selection_page.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -16,7 +16,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: const FeaturesPage(),
+      home: const FeatureSelectionPage(),
     );
   }
 }

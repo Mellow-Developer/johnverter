@@ -1,6 +1,349 @@
 import 'package:json_converter/utils.dart';
 
 class Generator {
+  static String generateRequestDtoClass(
+    final String className,
+    final dynamic jsonMap,
+    final bool considerFinalFields,
+    final bool considerNullable,
+    final bool includeToJson,
+    final bool reqPrefix,
+  ) {
+    if (jsonMap is Map<String, dynamic>) {
+      final constructorFields = jsonMap.entries.map((entry) {
+        final fieldName = Utils.toCamelCase(entry.key);
+        return '  this.$fieldName;';
+      }).join('\n');
+
+      final fields = jsonMap.entries.map(
+        (entry) {
+          final fieldType = entry.value.runtimeType;
+          final fieldName = Utils.toCamelCase(entry.key);
+          if (entry.value is List) {
+            return '  ${considerFinalFields ? 'final' : ''} List<${Utils.capitalizeFirstLetter(fieldName)}${reqPrefix ? 'Req' : ''}Dto?>? $fieldName;';
+          } else if (entry.value is Map<String, dynamic>) {
+            return '  ${considerFinalFields ? 'final' : ''} ${Utils.capitalizeFirstLetter(fieldName)}${reqPrefix ? 'Req' : ''}Dto? $fieldName;';
+          } else {
+            final dartType = Utils.getDartType(fieldType);
+            return '  ${considerFinalFields ? 'final' : ''} $dartType${considerNullable ? '?' : ''} $fieldName;';
+          }
+        },
+      ).join('\n');
+
+      String toJsonAssignments = '';
+      if (includeToJson) {
+        jsonMap.forEach(
+          (key, value) {
+            if (value is Map<String, dynamic>) {
+              toJsonAssignments =
+                  '$toJsonAssignments      \'$key\': ${key.toLowerCase()}?.toJson(),';
+            } else {
+              toJsonAssignments =
+                  '$toJsonAssignments      \'$key\': ${Utils.toCamelCase(key)}${value is List ? '?.map((e) => e?.toJson()).toList()' : ''},';
+            }
+          },
+        );
+      }
+
+      String codeString = '''
+class $className${reqPrefix ? 'Req' : ''}Dto {
+  $className${reqPrefix ? 'Req' : ''}Dto({
+${constructorFields.replaceAll(';', ',')}
+  });
+
+${includeToJson ? '''
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+$toJsonAssignments
+    };
+  }
+''' : ''}
+
+$fields
+}
+
+''';
+
+      jsonMap.forEach(
+        (key, value) {
+          if (value is List) {
+            final nestedCodeString = generateRequestDtoClass(Utils.capitalizeFirstLetter(key),
+                value.firstOrNull, considerFinalFields, considerNullable, includeToJson, reqPrefix);
+
+            codeString = codeString + nestedCodeString;
+          } else if (value is Map<String, dynamic>) {
+            final nestedCodeString = generateRequestDtoClass(Utils.capitalizeFirstLetter(key),
+                value, considerFinalFields, considerNullable, includeToJson, reqPrefix);
+
+            codeString = codeString + nestedCodeString;
+          }
+        },
+      );
+
+      return codeString;
+    } else {
+      /// Type is something else not json
+      final fieldName = Utils.toCamelCase(className);
+
+      final constructorFields = '  this.${className.toLowerCase()};';
+
+      String fields = '';
+
+      final fieldType = jsonMap.runtimeType;
+
+      if (jsonMap is List) {
+        fields =
+            '  ${considerFinalFields ? 'final' : ''} List<${Utils.capitalizeFirstLetter(fieldName)}${reqPrefix ? 'Req' : ''}Dto?>? $fieldName;';
+      } else if (jsonMap is Map<String, dynamic>) {
+        fields =
+            '  ${considerFinalFields ? 'final' : ''} ${Utils.capitalizeFirstLetter(fieldName)}${reqPrefix ? 'Req' : ''}Dto? $fieldName;';
+      } else {
+        final dartType = Utils.getDartType(fieldType);
+        fields =
+            '  ${considerFinalFields ? 'final' : ''} $dartType${considerNullable ? '?' : ''} ${className.toLowerCase()};';
+      }
+
+      final toJsonAssignments = includeToJson
+          ? '      \'${className.toLowerCase()}\': ${className.toLowerCase()}${jsonMap is List ? '?.map((e) => e?.toJson()).toList()' : jsonMap is Map<String, dynamic> ? '?.toJson()' : ''},'
+          : '';
+
+      String codeString = '''
+class $className${reqPrefix ? 'Req' : ''}Dto {
+  $className${reqPrefix ? 'Req' : ''}Dto({
+${constructorFields.replaceAll(';', ',')}
+  });
+
+${includeToJson ? '''
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+$toJsonAssignments
+    };
+  }
+''' : ''}
+
+$fields
+}
+
+''';
+
+      return codeString;
+    }
+  }
+
+  static String generateRequestEntityClass(
+    final String className,
+    final dynamic jsonMap,
+    final bool considerFinalFields,
+    final bool considerNullable,
+    final bool reqPrefix,
+  ) {
+    if (jsonMap is Map<String, dynamic>) {
+      final constructorFields = jsonMap.entries.map((entry) {
+        final fieldName = Utils.toCamelCase(entry.key);
+        return '  this.$fieldName;';
+      }).join('\n');
+
+      final fields = jsonMap.entries.map(
+        (entry) {
+          final fieldType = entry.value.runtimeType;
+          final fieldName = Utils.toCamelCase(entry.key);
+          if (entry.value is List) {
+            return '  ${considerFinalFields ? 'final' : ''} List<${Utils.capitalizeFirstLetter(fieldName)}${reqPrefix ? 'Req' : ''}Entity?>? $fieldName;';
+          } else if (entry.value is Map<String, dynamic>) {
+            return '  ${considerFinalFields ? 'final' : ''} ${Utils.capitalizeFirstLetter(fieldName)}${reqPrefix ? 'Req' : ''}Entity? $fieldName;';
+          } else {
+            final dartType = Utils.getDartType(fieldType);
+            return '  ${considerFinalFields ? 'final' : ''} $dartType${considerNullable ? '?' : ''} $fieldName;';
+          }
+        },
+      ).join('\n');
+
+      String codeString = '''
+class $className${reqPrefix ? 'Req' : ''}Entity {
+  $className${reqPrefix ? 'Req' : ''}Entity({
+${constructorFields.replaceAll(';', ',')}
+  });
+
+$fields
+}
+
+''';
+
+      jsonMap.forEach(
+        (key, value) {
+          if (value is List) {
+            final nestedCodeString = generateRequestEntityClass(
+              Utils.capitalizeFirstLetter(key),
+              value.firstOrNull,
+              considerFinalFields,
+              considerNullable,
+              reqPrefix,
+            );
+
+            codeString = codeString + nestedCodeString;
+          } else if (value is Map<String, dynamic>) {
+            final nestedCodeString = generateRequestEntityClass(
+              Utils.capitalizeFirstLetter(key),
+              value,
+              considerFinalFields,
+              considerNullable,
+              reqPrefix,
+            );
+
+            codeString = codeString + nestedCodeString;
+          }
+        },
+      );
+
+      return codeString;
+    } else {
+      /// Type is something else not json
+      final fieldName = Utils.toCamelCase(className);
+
+      final constructorFields = '  this.${className.toLowerCase()};';
+
+      String fields = '';
+
+      final fieldType = jsonMap.runtimeType;
+
+      if (jsonMap is List) {
+        fields =
+            '  ${considerFinalFields ? 'final' : ''} List<${Utils.capitalizeFirstLetter(fieldName)}${reqPrefix ? 'Req' : ''}Entity?>? $fieldName;';
+      } else if (jsonMap is Map<String, dynamic>) {
+        fields =
+            '  ${considerFinalFields ? 'final' : ''} ${Utils.capitalizeFirstLetter(fieldName)}${reqPrefix ? 'Req' : ''}Entity? $fieldName;';
+      } else {
+        final dartType = Utils.getDartType(fieldType);
+        fields =
+            '  ${considerFinalFields ? 'final' : ''} $dartType${considerNullable ? '?' : ''} ${className.toLowerCase()};';
+      }
+
+      String codeString = '''
+class $className${reqPrefix ? 'Req' : ''}Entity {
+  $className${reqPrefix ? 'Req' : ''}Entity({
+${constructorFields.replaceAll(';', ',')}
+  });
+
+$fields
+}
+
+''';
+
+      return codeString;
+    }
+  }
+
+  static String generateRequestMapperExtensions(
+    String className,
+    dynamic jsonMap,
+    final bool reqPrefix,
+  ) {
+    if (jsonMap is Map<String, dynamic>) {
+      final mapToEntityFields = jsonMap.entries.map((entry) {
+        final fieldName = Utils.toCamelCase(entry.key);
+        final fieldValue = entry.value;
+        if (fieldValue is List) {
+          final nestedFieldName = Utils.toCamelCase(entry.key);
+          return '      $fieldName: $nestedFieldName?.map((final ${Utils.capitalizeFirstLetter(fieldName)}${reqPrefix ? 'Req' : ''}Dto? e) => e?.mapToEntity()).toList(),';
+        } else if (fieldValue is Map<String, dynamic>) {
+          final nestedFieldName = Utils.toCamelCase(entry.key);
+          return '      $fieldName: $nestedFieldName?.mapToEntity(),';
+        } else {
+          return '      $fieldName: $fieldName,';
+        }
+      }).join('\n');
+
+      final mapToDtoFields = jsonMap.entries.map((entry) {
+        final fieldName = Utils.toCamelCase(entry.key);
+        final fieldValue = entry.value;
+        if (fieldValue is List) {
+          final nestedFieldName = Utils.toCamelCase(entry.key);
+          return '      $fieldName: $nestedFieldName?.map((final ${Utils.capitalizeFirstLetter(fieldName)}${reqPrefix ? 'Req' : ''}Entity? e) => e?.mapToDto()).toList(),';
+        } else if (fieldValue is Map<String, dynamic>) {
+          final nestedFieldName = Utils.toCamelCase(entry.key);
+          return '      $fieldName: $nestedFieldName?.mapToDto(),';
+        } else {
+          return '      $fieldName: $fieldName,';
+        }
+      }).join('\n');
+
+
+      String mapToEntityString = '''
+extension $className${reqPrefix ? 'Req' : ''}DtoMapper on $className${reqPrefix ? 'Req' : ''}Dto {
+  $className${reqPrefix ? 'Req' : ''}Entity mapToEntity() {
+    return $className${reqPrefix ? 'Req' : ''}Entity(
+$mapToEntityFields
+    );
+  }
+}
+
+''';
+
+      jsonMap.forEach(
+            (key, value) {
+          if (value is List) {
+            final nestedCodeString = generateRequestMapperExtensions(
+              Utils.capitalizeFirstLetter(key),
+              value.firstOrNull,
+              reqPrefix,
+            );
+
+            mapToEntityString = mapToEntityString + nestedCodeString;
+          } else if (value is Map<String, dynamic>) {
+            final nestedCodeString = generateRequestMapperExtensions(
+              Utils.capitalizeFirstLetter(key),
+              value,
+              reqPrefix,
+            );
+
+            mapToEntityString = mapToEntityString + nestedCodeString;
+          }
+        },
+      );
+
+      String mapToDtoString = '''
+extension $className${reqPrefix ? 'Req' : ''}EntityMapper on $className${reqPrefix ? 'Req' : ''}Entity {
+  $className${reqPrefix ? 'Req' : ''}Dto mapToDto() {
+    return $className${reqPrefix ? 'Req' : ''}Dto(
+$mapToDtoFields
+    );
+  }
+}
+
+''';
+
+      return mapToEntityString + mapToDtoString;
+    } else {
+      String mapToDtoField = '      ${className.toLowerCase()}: ${className.toLowerCase()},';
+
+      String mapToDtoCodeString = '''
+extension $className${reqPrefix ? 'Req' : ''}EntityMapper on $className${reqPrefix ? 'Req' : ''}Entity {
+  $className${reqPrefix ? 'Req' : ''}Dto mapToDto() {
+    return $className${reqPrefix ? 'Req' : ''}Dto(
+$mapToDtoField
+    );
+  }
+}
+
+''';
+
+      String mapToEntityField = '      ${className.toLowerCase()}: ${className.toLowerCase()},';
+
+      String mapToEntityCodeString = '''
+extension $className${reqPrefix ? 'Req' : ''}DtoMapper on $className${reqPrefix ? 'Req' : ''}Dto {
+  $className${reqPrefix ? 'Req' : ''}Entity mapToEntity() {
+    return $className${reqPrefix ? 'Req' : ''}Entity(
+$mapToEntityField
+    );
+  }
+}
+
+''';
+
+      return mapToDtoCodeString + mapToEntityCodeString;
+    }
+  }
+
   static String generateDtoClass(
     final String className,
     final Map<String, dynamic> jsonMap,
